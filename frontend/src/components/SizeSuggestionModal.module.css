@@ -1,0 +1,98 @@
+/* Overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* Modal Box */
+.modal {
+  width: 700px;
+  background: white;
+  border-radius: 12px;
+  padding: 25px 35px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.header h2 {
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Form Center */
+.form {
+  margin: 60px auto;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+/* Input Box */
+.inputBox label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.inputBox input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  margin-top: 8px;
+  outline: none;
+}
+
+.inputBox input:focus {
+  border-color: black;
+}
+
+/* Buttons */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+.cancelBtn {
+  padding: 10px 18px;
+  border: 1px solid black;
+  background: white;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.nextBtn {
+  padding: 10px 18px;
+  border: none;
+  background: black;
+  color: white;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.nextBtn:hover {
+  opacity: 0.85;
+}
