@@ -2,8 +2,8 @@ import { useState } from "react";
 import styles from "./ProductDetail.module.css";
 import { Heart } from "lucide-react";
 
-import VirtualTryOnModal from "../components/VirtualTryOnModal";
-import SizeSuggestionModal from "../components/SizeSuggestionModal";
+import VirtualTryOnModal from "../Features/VirtualTryOnModal";
+import SizeSuggestionModal from "../Features/SizeSuggestionModal";
 
 export default function ProductDetail() {
   const [selectedSize, setSelectedSize] = useState("M");

@@ -1,0 +1,3 @@
+First I import api folder from git. then i find NN.ipynb.
+Select Python Version 3.11.9 (Newer version make not work so needed o install v3.11.9)
+to run backend main use "uvicorn app.main:app --reload"
