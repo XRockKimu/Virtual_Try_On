@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 
 
 class Predictor:
-    FEATURE_ORDER = ["height_cm", "weight_kg", "age"]
+    FEATURE_ORDER = ["height", "weight", "age"]
     
     MODEL_NAMES = {
         "decision_tree": "Decision Tree",
@@ -28,8 +28,8 @@ class Predictor:
         try:
             # Prepare input in exact feature order
             input_data = pd.DataFrame([{
-                "height_cm": request.height_cm,
-                "weight_kg": request.weight_kg,
+                "height": request.height_cm,
+                "weight": request.weight_kg,
                 "age": request.age
             }])
             

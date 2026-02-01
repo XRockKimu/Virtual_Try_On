@@ -9,7 +9,7 @@ class Settings(BaseSettings):
         "neural_network": "models/mlp_model.pkl",
         "naive_bayes": "models/naive_bayes_model.pkl"
     }
-    MODEL_VERSION: str = "dev"
+    MODEL_VERSION: str = "1.0.0"
     LOG_LEVEL: str = "INFO"
     
     class Config:

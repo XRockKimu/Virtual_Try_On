@@ -1,3 +1,7 @@
 First I import api folder from git. then i find NN.ipynb.
 Select Python Version 3.11.9 (Newer version make not work so needed o install v3.11.9)
+
+
+& D:/Capstone/api/.venv/Scripts/Activate.ps1
+api folder: pip install pandas numpy matplotlib seaborn scikit-learn
 to run backend main use "uvicorn app.main:app --reload"
