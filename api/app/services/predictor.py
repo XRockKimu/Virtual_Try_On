@@ -20,6 +20,15 @@ class Predictor:
         "naive_bayes": "Naive Bayes"
     }
     
+    SIZE_MAPPING = {
+        0: "XS",
+        1: "S",
+        2: "M",
+        3: "L",
+        4: "XL",
+        5: "XXL",
+    }
+    
     def __init__(self, model, model_type: str = "decision_tree"):
         self.model = model
         self.model_type = model_type
@@ -36,34 +45,38 @@ class Predictor:
             # Reorder columns to match expected order
             input_data = input_data[self.FEATURE_ORDER]
             
-            # Get prediction
-            recommended_size = self.model.predict(input_data)[0]
-            
-            # Get alternatives if predict_proba exists
+            # Get prediction and alternatives
             alternatives = []
             alternatives_note = None
             
             if hasattr(self.model, "predict_proba"):
                 try:
                     probas = self.model.predict_proba(input_data)[0]
-                    classes = self.model.classes_
                     
                     # Get top 3 with scores
                     top_indices = np.argsort(probas)[::-1][:3]
                     alternatives = [
-                        Alternative(size=str(classes[idx]), score=float(probas[idx]))
+                        Alternative(size=self.SIZE_MAPPING.get(idx, "Unknown"), score=float(probas[idx]))
                         for idx in top_indices
                     ]
+                    
+                    # The recommended size is the one with the highest probability
+                    recommended_size = alternatives[0].size
+                    
                 except Exception as e:
                     logger.warning(f"Could not compute alternatives: {e}")
                     alternatives_note = "Alternatives unavailable"
+                    prediction_index = int(self.model.predict(input_data)[0])
+                    recommended_size = self.SIZE_MAPPING.get(prediction_index, "Unknown")
             else:
                 alternatives_note = "Model does not support probability predictions"
+                prediction_index = int(self.model.predict(input_data)[0])
+                recommended_size = self.SIZE_MAPPING.get(prediction_index, "Unknown")
             
             model_display_name = self.MODEL_NAMES.get(self.model_type, self.model_type)
             
             return PredictResponse(
-                recommended_size=str(recommended_size),
+                recommended_size=recommended_size,
                 alternatives=alternatives,
                 model_version=f"{settings.MODEL_VERSION} ({model_display_name})",
                 alternatives_note=alternatives_note

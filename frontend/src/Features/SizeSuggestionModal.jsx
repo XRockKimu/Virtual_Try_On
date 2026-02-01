@@ -6,6 +6,7 @@ export default function SizeSuggestionModal({ onClose }) {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [age, setAge] = useState("");
+  const [modelType, setModelType] = useState("decision_tree");
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -30,7 +31,7 @@ export default function SizeSuggestionModal({ onClose }) {
           height_cm: parseFloat(height),
           weight_kg: parseFloat(weight),
           age: parseFloat(age),
-          model_type: "decision_tree",
+          model_type: modelType,
         }),
       });
 
@@ -96,6 +97,20 @@ export default function SizeSuggestionModal({ onClose }) {
                 onChange={(e) => setAge(e.target.value)}
                 disabled={loading}
               />
+            </div>
+
+            {/* Model Selection */}
+            <div className={styles.inputBox}>
+              <label>* Model</label>
+              <select
+                value={modelType}
+                onChange={(e) => setModelType(e.target.value)}
+                disabled={loading}
+              >
+                <option value="decision_tree">Decision Tree</option>
+                <option value="neural_network">Neural Network</option>
+                <option value="naive_bayes">Naive Bayes</option>
+              </select>
             </div>
           </div>
         ) : (
