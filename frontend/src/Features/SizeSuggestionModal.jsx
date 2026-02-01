@@ -3,17 +3,33 @@ import { useState } from "react";
 import styles from "./SizeSuggestionModal.module.css";
 
 export default function SizeSuggestionModal({ onClose }) {
+  // Form Inputs
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [age, setAge] = useState("");
   const [modelType, setModelType] = useState("decision_tree");
+
+  // Prediction Result
   const [prediction, setPrediction] = useState(null);
+
+  // UI States
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  async function handleNext() {
+  // API URL from .env
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // Submit Prediction Request
+  async function handlePredict() {
+    // Validation: Empty fields
     if (!height || !weight || !age) {
-      alert("Please enter height, weight, and age!");
+      alert("Please enter height, weight, and age.");
+      return;
+    }
+
+    // Validation: Positive values only
+    if (height <= 0 || weight <= 0 || age <= 0) {
+      alert("Please enter valid positive numbers.");
       return;
     }
 
@@ -22,7 +38,7 @@ export default function SizeSuggestionModal({ onClose }) {
     setPrediction(null);
 
     try {
-      const response = await fetch("http://localhost:8000/predict", {
+      const response = await fetch(`${API_URL}/predict`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,29 +46,36 @@ export default function SizeSuggestionModal({ onClose }) {
         body: JSON.stringify({
           height_cm: parseFloat(height),
           weight_kg: parseFloat(weight),
-          age: parseFloat(age),
+          age: parseInt(age),
           model_type: modelType,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || "Prediction failed");
+        throw new Error(errorData.detail || "Prediction failed.");
       }
 
       const data = await response.json();
       setPrediction(data);
     } catch (err) {
-      setError(err.message);
+      console.error("Prediction error:", err);
+      setError(err.message || "Server error. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
+  // Reset Prediction
+  function handleTryAgain() {
+    setPrediction(null);
+    setError(null);
+  }
+
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        {/* Header */}
+        {/*  HEADER  */}
         <div className={styles.header}>
           <h2>Size Suggestion</h2>
           <button className={styles.closeBtn} onClick={onClose}>
@@ -60,15 +83,15 @@ export default function SizeSuggestionModal({ onClose }) {
           </button>
         </div>
 
-        {/* Form */}
+        {/*  FORM  */}
         {!prediction ? (
           <div className={styles.form}>
             {/* Height */}
             <div className={styles.inputBox}>
-              <label>* Height</label>
+              <label>* Height (cm)</label>
               <input
                 type="number"
-                placeholder="Example 170 cm"
+                placeholder="Example: 170"
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
                 disabled={loading}
@@ -77,10 +100,10 @@ export default function SizeSuggestionModal({ onClose }) {
 
             {/* Weight */}
             <div className={styles.inputBox}>
-              <label>* Weight</label>
+              <label>* Weight (kg)</label>
               <input
                 type="number"
-                placeholder="Example 80 kg"
+                placeholder="Example: 80"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 disabled={loading}
@@ -92,7 +115,7 @@ export default function SizeSuggestionModal({ onClose }) {
               <label>* Age</label>
               <input
                 type="number"
-                placeholder="Example 25 years"
+                placeholder="Example: 25"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
                 disabled={loading}
@@ -108,52 +131,99 @@ export default function SizeSuggestionModal({ onClose }) {
                 disabled={loading}
               >
                 <option value="decision_tree">Decision Tree</option>
-                <option value="neural_network">Neural Network</option>
+                <option value="neural_network">Neural Network (MLP)</option>
                 <option value="naive_bayes">Naive Bayes</option>
               </select>
             </div>
           </div>
         ) : (
+          // RESULT
           <div className={styles.result}>
-            <h3>Suggested Size: {prediction.recommended_size}</h3>
+            <h3>
+               Suggested Size:{" "}
+              <span className={styles.size}>{prediction.recommended_size}</span>
+            </h3>
+
+            {/* Confidence + Alternatives */}
             {prediction.alternatives && prediction.alternatives.length > 0 && (
-              <div>
-                <h4>Alternatives:</h4>
+              <div className={styles.altBox}>
+                <h4>Other Possible Sizes:</h4>
+
                 <ul>
-                  {prediction.alternatives.map((alt, index) => (
-                    <li key={index}>
-                      {alt.size} (Score: {alt.score.toFixed(2)})
-                    </li>
-                  ))}
+                  {prediction.alternatives
+                    // Remove duplicate recommended size
+                    .filter(
+                      (alt) => alt.size !== prediction.recommended_size
+                    )
+                    .map((alt, index) => (
+                      <li key={index}>
+                        {alt.size} — Confidence:{" "}
+                        <strong>
+                          {(alt.score * 100).toFixed(1)}%
+                        </strong>
+                      </li>
+                    ))}
                 </ul>
               </div>
             )}
+
+            {/* Note */}
             {prediction.alternatives_note && (
               <p className={styles.note}>{prediction.alternatives_note}</p>
             )}
-            <p className={styles.modelVersion}>Model: {prediction.model_version}</p>
+
+            {/* Model Version */}
+            <p className={styles.modelVersion}>
+              Model Used: {prediction.model_version}
+            </p>
           </div>
         )}
 
-        {/* Loading / Error */}
-        {loading && <p>Loading...</p>}
-        {error && <p className={styles.error}>Error: {error}</p>}
+        {/* LOADING / ERROR */}
+        {loading && (
+          <p className={styles.loading}>Predicting your best size...</p>
+        )}
 
-        {/* Actions */}
+        {error && <p className={styles.error}>⚠ {error}</p>}
+
+        {/* ACTIONS  */}
         <div className={styles.actions}>
-          <button className={styles.cancelBtn} onClick={onClose} disabled={loading}>
+          <button
+            className={styles.cancelBtn}
+            onClick={onClose}
+            disabled={loading}
+          >
             Cancel
           </button>
 
           {!prediction && (
-            <button className={styles.nextBtn} onClick={handleNext} disabled={loading}>
+            <button
+              className={styles.nextBtn}
+              onClick={handlePredict}
+              disabled={loading}
+            >
               Get Suggestion →
             </button>
           )}
-           {prediction && (
-            <button className={styles.nextBtn} onClick={onClose} disabled={loading}>
-              Close
-            </button>
+
+          {prediction && (
+            <>
+              <button
+                className={styles.nextBtn}
+                onClick={handleTryAgain}
+                disabled={loading}
+              >
+                Try Again
+              </button>
+
+              <button
+                className={styles.nextBtn}
+                onClick={onClose}
+                disabled={loading}
+              >
+                Close
+              </button>
+            </>
           )}
         </div>
       </div>
