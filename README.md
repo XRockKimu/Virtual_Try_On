@@ -33,7 +33,7 @@ code .
 
 ---
 
-### 3. Install Dependencies
+### 3. Install Dependencies (skip this, If you don't see error when creating venv)
 
 Run:
 
