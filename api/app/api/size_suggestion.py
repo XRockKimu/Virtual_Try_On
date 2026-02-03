@@ -9,6 +9,9 @@ from typing import Dict, Any
 router = APIRouter()
 logger = get_logger(__name__)
 
+@router.get("/")
+async def root():
+    return {"message": "Size Suggestion API is running."}
 
 @router.post("/predict", response_model=PredictResponse)
 async def predict(request: Request, body: PredictRequest):
@@ -27,7 +30,8 @@ async def predict(request: Request, body: PredictRequest):
         )
     
     model = model_loader.get_model(model_type)
-    predictor = Predictor(model, model_type)
+    preprocessor = model_loader.get_preprocessor()
+    predictor = Predictor(model, model_type, preprocessor)
     
     try:
         result = predictor.predict(body)
@@ -40,6 +44,5 @@ async def predict(request: Request, body: PredictRequest):
 
 @router.get("/models")
 async def get_models(request: Request) -> Dict[str, Any]:
-    """Get information about available models"""
     model_loader = request.app.state.model_loader
     return model_loader.get_status()

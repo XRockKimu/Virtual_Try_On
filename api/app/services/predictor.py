@@ -6,38 +6,42 @@ from app.schemas.request import PredictRequest
 from app.schemas.response import PredictResponse, Alternative
 from app.core.config import settings
 from app.core.logging import get_logger
+from app.services.preprocessor import DataPreprocessor
 
 
 logger = get_logger(__name__)
 
 
 class Predictor:
-    FEATURE_ORDER = ["height_cm", "weight_kg", "age"]
+    FEATURE_ORDER = ["age", "height", "weight"]
     
     MODEL_NAMES = {
         "decision_tree": "Decision Tree",
         "neural_network": "Neural Network (MLP)",
-        "naive_bayes": "Naive Bayes"
     }
     
-    def __init__(self, model, model_type: str = "decision_tree"):
+    def __init__(self, model, model_type: str = "decision_tree", preprocessor: DataPreprocessor = None):
         self.model = model
         self.model_type = model_type
+        self.preprocessor = preprocessor if preprocessor else DataPreprocessor()
     
     def predict(self, request: PredictRequest) -> PredictResponse:
         try:
-            # Prepare input in exact feature order
-            input_data = pd.DataFrame([{
-                "height_cm": request.height_cm,
-                "weight_kg": request.weight_kg,
-                "age": request.age
-            }])
+            # Preprocess input (z-score normalization, outlier handling)
+            input_data = self.preprocessor.preprocess_input(
+                age=request.age,
+                height=request.height,
+                weight=request.weight
+            )
             
-            # Reorder columns to match expected order
+            # Ensure feature order is correct
             input_data = input_data[self.FEATURE_ORDER]
             
             # Get prediction
-            recommended_size = self.model.predict(input_data)[0]
+            recommended_size_num = self.model.predict(input_data)[0]
+            
+            # Convert numeric prediction to size label
+            recommended_size = self.preprocessor.postprocess_output(recommended_size_num)
             
             # Get alternatives if predict_proba exists
             alternatives = []
@@ -51,7 +55,10 @@ class Predictor:
                     # Get top 3 with scores
                     top_indices = np.argsort(probas)[::-1][:3]
                     alternatives = [
-                        Alternative(size=str(classes[idx]), score=float(probas[idx]))
+                        Alternative(
+                            size=self.preprocessor.postprocess_output(classes[idx]), 
+                            score=float(probas[idx])
+                        )
                         for idx in top_indices
                     ]
                 except Exception as e:
@@ -63,7 +70,7 @@ class Predictor:
             model_display_name = self.MODEL_NAMES.get(self.model_type, self.model_type)
             
             return PredictResponse(
-                recommended_size=str(recommended_size),
+                recommended_size=recommended_size,
                 alternatives=alternatives,
                 model_version=f"{settings.MODEL_VERSION} ({model_display_name})",
                 alternatives_note=alternatives_note

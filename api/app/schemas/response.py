@@ -14,8 +14,11 @@ class PredictResponse(BaseModel):
     alternatives_note: Optional[str] = None
 
 
-class HealthResponse(BaseModel):
-    status: str
+class VirtualTryOnResponse(BaseModel):
+    image_url: str
+    message: str
+    category: str
+    processing_time: float    
 
 
 class ReadyResponse(BaseModel):

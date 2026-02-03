@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional, Any, Dict
 from app.core.config import settings
 from app.core.logging import get_logger
+from app.services.preprocessor import DataPreprocessor
 
 
 logger = get_logger(__name__)
@@ -13,13 +14,22 @@ class ModelLoader:
         self.models: Dict[str, Optional[Any]] = {
             "decision_tree": None,
             "neural_network": None,
-            "naive_bayes": None
         }
         self.model_status: Dict[str, dict] = {}
         self.is_loaded = False
+        self.preprocessor = DataPreprocessor()
     
     def load_model(self) -> bool:
-        """Load all available models"""
+        # Load preprocessing statistics from training data
+        try:
+            data_path = Path("data/final_test.csv")
+            if data_path.exists():
+                self.preprocessor.load_stats_from_data(str(data_path))
+            else:
+                logger.warning("Training data not found, using default preprocessing")
+        except Exception as e:
+            logger.warning(f"Could not load preprocessing stats: {e}")
+        
         success_count = 0
         
         for model_name, model_path_str in settings.MODEL_PATHS.items():
@@ -57,19 +67,18 @@ class ModelLoader:
         return self.is_loaded
     
     def get_model(self, model_type: str = "decision_tree") -> Optional[Any]:
-        """Get a specific model by type"""
         return self.models.get(model_type)
     
     def is_model_ready(self, model_type: str) -> bool:
-        """Check if a specific model is ready"""
         return self.models.get(model_type) is not None
     
     def is_ready(self) -> bool:
-        """Check if at least one model is loaded"""
         return self.is_loaded
     
+    def get_preprocessor(self) -> DataPreprocessor:
+        return self.preprocessor
+    
     def get_status(self) -> dict:
-        """Get status of all models"""
         models_info = {}
         for model_name in self.models.keys():
             status = self.model_status.get(model_name, {"loaded": False, "error": "Not initialized"})

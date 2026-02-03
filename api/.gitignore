@@ -6,3 +6,12 @@ data/final_test.csv
 models/decision_tree_model.pkl
 models/mlp_model.pkl
 models/naive_bayes_model.pkl
+
+.env
+
+temp/
+temp/upload/
+temp/output/
+
+tests/test_*.py
+tests/__init__.py

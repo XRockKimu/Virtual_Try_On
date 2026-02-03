@@ -1,16 +1,23 @@
 from pydantic_settings import BaseSettings
 from typing import Dict
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
 class Settings(BaseSettings):
-    # Model paths for all three models
-    MODEL_PATHS: Dict[str, str] = {
-        "decision_tree": "models/decision_tree_model.pkl",
-        "neural_network": "models/mlp_model.pkl",
-        "naive_bayes": "models/naive_bayes_model.pkl"
-    }
-    MODEL_VERSION: str = "dev"
+    MODEL_DECISION_TREE_PATH: str
+    MODEL_NEURAL_NETWORK_PATH: str
+    MODEL_VERSION: str
     LOG_LEVEL: str = "INFO"
+    GEMINI_API_KEY: str = ""
+    
+    @property
+    def MODEL_PATHS(self) -> Dict[str, str]:
+        return {
+            "decision_tree": self.MODEL_DECISION_TREE_PATH,
+            "neural_network": self.MODEL_NEURAL_NETWORK_PATH,
+        }
     
     class Config:
         env_file = ".env"
