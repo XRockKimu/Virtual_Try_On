@@ -1,0 +1,73 @@
+.wrapper {
+  width: 100%;
+  padding: 20px;
+  text-align: center;
+}
+
+.wrapper h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.wrapper p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+/* Upload container */
+.uploadBox {
+  background: #f9f9f9;
+  border: 2px dashed #ccc;
+  border-radius: 14px;
+  padding: 15px;
+  margin-bottom: 18px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.uploadBox:hover {
+  border-color: #000;
+}
+
+/* Label */
+.uploadBox label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+/* Input */
+.uploadBox input {
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+/* Preview Image */
+.uploadBox img {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.nextBtn {
+  width: 100%;
+  max-width: 220px;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  background: black;
+  color: white;
+  transition: 0.3s;
+}
+
+.nextBtn:hover {
+  background: #333;
+}

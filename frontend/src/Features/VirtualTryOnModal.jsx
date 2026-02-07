@@ -1,41 +1,60 @@
-import { X, UploadCloud } from "lucide-react";
+// src/Features/VirtualTryOnModal.jsx
+
+import { useState } from "react";
+import VirtualTryOnUpload from "./VirtualTryOnUpload";
+import VirtualTryOnResult from "./VirtualTryOnResult";
+import { generateTryOn } from "./virtualTryOnService";
+
 import styles from "./VirtualTryOnModal.module.css";
 
 export default function VirtualTryOnModal({ onClose }) {
+  const [step, setStep] = useState(1);
+
+  const [userImage, setUserImage] = useState(null);
+  const [productImage, setProductImage] = useState(null);
+
+  const [resultImage, setResultImage] = useState(null);
+
+  // When user clicks Next
+  const handleNext = async () => {
+    if (!userImage || !productImage) {
+      alert("Please upload both user and product images.");
+      return;
+    }
+
+    // Generate demo result (later ML API)
+    const result = await generateTryOn(userImage, productImage);
+
+    setResultImage(result);
+    setStep(2);
+  };
+
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        {/* Header */}
-        <div className={styles.header}>
-          <h2>Virtual Try-On</h2>
-          <button className={styles.closeBtn} onClick={onClose}>
-            <X size={22} />
-          </button>
-        </div>
+        {/* Close Button */}
+        <button className={styles.closeBtn} onClick={onClose}>
+          ✕
+        </button>
 
-        {/* Upload Box */}
-        <div className={styles.uploadBox}>
-          <UploadCloud size={40} />
+        {/* Step 1 Upload */}
+        {step === 1 && (
+          <VirtualTryOnUpload
+            userImage={userImage}
+            productImage={productImage}
+            setUserImage={setUserImage}
+            setProductImage={setProductImage}
+            onNext={handleNext}
+          />
+        )}
 
-          <p>
-            Drag your file(s) or <span>browse</span>
-          </p>
-
-          <small>
-            Max 10 MB files are allowed <br />
-            Only support .jpg and .png files
-          </small>
-        </div>
-
-        {/* Buttons */}
-        <div className={styles.actions}>
-          <button className={styles.cancelBtn} onClick={onClose}>
-            Cancel
-          </button>
-          <button className={styles.uploadBtn}>
-            Upload →
-          </button>
-        </div>
+        {/* Step 2 Result */}
+        {step === 2 && (
+          <VirtualTryOnResult
+            resultImage={resultImage}
+            onBack={() => setStep(1)}
+          />
+        )}
       </div>
     </div>
   );
