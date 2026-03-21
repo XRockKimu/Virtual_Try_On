@@ -3,14 +3,6 @@ import sys
 from app.core.config import settings
 
 
-def setup_logging():
-    logging.basicConfig(
-        level=getattr(logging, settings.LOG_LEVEL.upper()),
-        format="%(asctime)s [%(levelname)s] [%(client_ip)s] %(name)s: %(message)s",
-        handlers=[logging.StreamHandler(sys.stdout)]
-    )
-
-
 class ClientIPFilter(logging.Filter):
     def __init__(self):
         super().__init__()
@@ -24,7 +16,20 @@ class ClientIPFilter(logging.Filter):
 client_ip_filter = ClientIPFilter()
 
 
+def setup_logging():
+    # Create handler with client_ip in format
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s [%(levelname)s] [%(client_ip)s] %(name)s: %(message)s")
+    )
+    handler.addFilter(client_ip_filter)
+    
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(getattr(logging, settings.LOG_LEVEL.upper()))
+    root_logger.addHandler(handler)
+
+
 def get_logger(name: str) -> logging.Logger:
     logger = logging.getLogger(name)
-    logger.addFilter(client_ip_filter)
     return logger

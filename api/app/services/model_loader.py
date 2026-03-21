@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional, Any, Dict
 from app.core.config import settings
 from app.core.logging import get_logger
+from app.services.preprocessor import DataPreprocessor
 
 
 logger = get_logger(__name__)
@@ -13,13 +14,27 @@ class ModelLoader:
         self.models: Dict[str, Optional[Any]] = {
             "decision_tree": None,
             "neural_network": None,
-            "naive_bayes": None
         }
         self.model_status: Dict[str, dict] = {}
         self.is_loaded = False
+        self.preprocessor = DataPreprocessor()
     
     def load_model(self) -> bool:
-        """Load all available models"""
+        # Load StandardScaler
+        try:
+            scaler_path = Path(settings.FEATURE_SCALER_PATH)
+            
+            logger.info("Loading StandardScaler for feature normalization...")
+            
+            if scaler_path.exists():
+                self.preprocessor.load_scaler(scaler_path=str(scaler_path))
+                logger.info("StandardScaler loaded successfully")
+            else:
+                logger.error(f"StandardScaler not found at {scaler_path}")
+                    
+        except Exception as e:
+            logger.error(f"Could not load scaler: {e}", exc_info=True)
+        
         success_count = 0
         
         for model_name, model_path_str in settings.MODEL_PATHS.items():
@@ -57,19 +72,18 @@ class ModelLoader:
         return self.is_loaded
     
     def get_model(self, model_type: str = "decision_tree") -> Optional[Any]:
-        """Get a specific model by type"""
         return self.models.get(model_type)
     
     def is_model_ready(self, model_type: str) -> bool:
-        """Check if a specific model is ready"""
         return self.models.get(model_type) is not None
     
     def is_ready(self) -> bool:
-        """Check if at least one model is loaded"""
         return self.is_loaded
     
+    def get_preprocessor(self) -> DataPreprocessor:
+        return self.preprocessor
+    
     def get_status(self) -> dict:
-        """Get status of all models"""
         models_info = {}
         for model_name in self.models.keys():
             status = self.model_status.get(model_name, {"loaded": False, "error": "Not initialized"})

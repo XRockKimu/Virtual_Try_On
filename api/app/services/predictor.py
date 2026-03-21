@@ -1,91 +1,81 @@
+
 import numpy as np
 import pandas as pd
-from app.schemas.request import PredictRequest
-from app.schemas.response import PredictResponse, Alternative
+from typing import List, Tuple
+from app.schemas.size_suggestion import PredictRequest, PredictResponse, Alternative
 from app.core.config import settings
 from app.core.logging import get_logger
+from app.services.preprocessor import DataPreprocessor
+
 
 logger = get_logger(__name__)
 
 
 class Predictor:
-    FEATURE_ORDER = ["height", "weight", "age"]
-
+    # Must match the feature order used during training
+    FEATURE_ORDER = ["age", "height", "weight", "bmi", "weight-squared"]
+    
     MODEL_NAMES = {
         "decision_tree": "Decision Tree",
         "neural_network": "Neural Network (MLP)",
-        "naive_bayes": "Naive Bayes"
     }
-
-    # Reverse mapping (fix numeric outputs)
-    SIZE_MAPPING = {
-        1: "XXS",
-        2: "S",
-        3: "M",
-        4: "L",
-        5: "XL",
-        6: "XXL",
-        7: "XXXL"
-    }
-
-    def __init__(self, model, model_type: str = "decision_tree"):
+    
+    def __init__(self, model, model_type: str = "decision_tree", preprocessor: DataPreprocessor = None):
         self.model = model
         self.model_type = model_type
-
+        self.preprocessor = preprocessor if preprocessor else DataPreprocessor()
+    
     def predict(self, request: PredictRequest) -> PredictResponse:
         try:
-            # Prepare input data
-            input_data = pd.DataFrame([{
-                "height": request.height_cm,
-                "weight": request.weight_kg,
-                "age": request.age
-            }])
-
-            # Ensure correct feature order
-            input_data = input_data[self.FEATURE_ORDER]
-
-            # Get numeric prediction
-            pred = int(self.model.predict(input_data)[0])
-
-            # Convert numeric prediction → size label
-            recommended_size = self.SIZE_MAPPING.get(pred, "Unknown")
-
+            # Preprocess input (StandardScaler normalization)
+            standardized_data = self.preprocessor.preprocess_input(
+                age=request.age,
+                height=request.height,
+                weight=request.weight
+            )
+            
+            # Ensure feature order is correct
+            standardized_data = standardized_data[self.FEATURE_ORDER]
+            
+            # Get prediction
+            recommended_size_num = self.model.predict(standardized_data)[0]
+            
+            # Convert numeric prediction to size label
+            recommended_size = self.preprocessor.postprocess_output(recommended_size_num)
+            
+            # Get alternatives if predict_proba exists
             alternatives = []
             alternatives_note = None
-
-            # Alternatives with probabilities
+            
             if hasattr(self.model, "predict_proba"):
                 try:
-                    probas = self.model.predict_proba(input_data)[0]
+                    probas = self.model.predict_proba(standardized_data)[0]
                     classes = self.model.classes_
-
-                    # Top 3 predictions
+                    
+                    # Get top 3 with scores
                     top_indices = np.argsort(probas)[::-1][:3]
-
                     alternatives = [
                         Alternative(
-                            size=self.SIZE_MAPPING.get(int(classes[idx]), "Unknown"),
+                            size=self.preprocessor.postprocess_output(classes[idx]), 
                             score=float(probas[idx])
                         )
                         for idx in top_indices
                     ]
-
                 except Exception as e:
                     logger.warning(f"Could not compute alternatives: {e}")
                     alternatives_note = "Alternatives unavailable"
-
             else:
                 alternatives_note = "Model does not support probability predictions"
-
+            
             model_display_name = self.MODEL_NAMES.get(self.model_type, self.model_type)
-
+            
             return PredictResponse(
                 recommended_size=recommended_size,
                 alternatives=alternatives,
                 model_version=f"{settings.MODEL_VERSION} ({model_display_name})",
                 alternatives_note=alternatives_note
             )
-
+            
         except Exception as e:
             logger.error(f"Prediction error: {e}", exc_info=True)
             raise
