@@ -130,12 +130,13 @@ export default function BodyMeasurements() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">Body Measurements</h2>
-        <p className="text-gray-600 mb-8">Upload or capture your front and side images to get accurate body measurements</p>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <h2 className="text-4xl font-extrabold tracking-tight text-brand-950 mb-3">Body Measurements</h2>
+        <p className="text-lg text-gray-500 mb-8 max-w-2xl leading-relaxed">Upload or capture your front and side images to get accurate body measurements for a perfect fit.</p>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+          <div className="bg-red-50 border border-red-100 text-red-700 px-5 py-4 rounded-xl mb-6 flex items-center gap-3">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             {error}
           </div>
         )}
@@ -151,7 +152,7 @@ export default function BodyMeasurements() {
         <canvas ref={canvasRef} style={{ display: 'none' }} />
 
         <form onSubmit={handleSubmit}>
-          <div className="grid md:grid-cols-2 gap-8 mb-8">
+          <div className="grid md:grid-cols-2 gap-10 mb-10">
             {/* Front Image Upload */}
             <ImageUploadSection
               type="front"
@@ -183,19 +184,19 @@ export default function BodyMeasurements() {
           <HeightInput height={height} setHeight={setHeight} />
 
           {/* Action Buttons */}
-          <div className="flex justify-center gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 pt-8">
             <button
               type="submit"
               disabled={loading || !frontImage || !leftSideImage || !height}
-              className="px-12 py-4 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+              className="px-16 py-4 bg-brand-600 text-white font-bold text-lg rounded-xl hover:bg-brand-700 disabled:bg-brand-200 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center min-w-[280px]"
             >
               {loading ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                <span className="flex items-center">
+                  <svg className="animate-spin h-6 w-6 mr-3" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Processing...
+                  Processing Analysis...
                 </span>
               ) : (
                 'Get Measurements'
@@ -204,7 +205,7 @@ export default function BodyMeasurements() {
             <button
               type="button"
               onClick={handleReset}
-              className="px-8 py-4 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all"
+              className="px-10 py-4 bg-white border border-gray-200 text-gray-600 font-bold text-lg rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
             >
               Reset
             </button>

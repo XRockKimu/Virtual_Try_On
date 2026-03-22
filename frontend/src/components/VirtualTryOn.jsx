@@ -124,14 +124,14 @@ export default function VirtualTryOn() {
   return (
     <div className="max-w-7xl mx-auto">
       {!result ? (
-        <div className="flex gap-6">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Content Card - Left Side */}
-          <div className="flex-1 bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Virtual Try-On</h2>
-            <p className="text-gray-600 mb-8">Upload your photo and choose a garment to see how it looks on you</p>
+          <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <h2 className="text-4xl font-extrabold tracking-tight text-brand-950 mb-3">Virtual Try-On</h2>
+            <p className="text-lg text-gray-500 mb-10 max-w-2xl leading-relaxed">Experience fashion instantly. Upload your photo and choose a garment to see your new look.</p>
 
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <ImageUpload
                   type="person"
                   preview={personPreview}
@@ -154,14 +154,19 @@ export default function VirtualTryOn() {
                 />
               </div>
 
-              <ModelSelector model={model} setModel={handleModelChange} />
+              <div className="bg-gray-50/50 rounded-2xl p-6 border border-gray-100">
+                <ModelSelector model={model} setModel={handleModelChange} />
+              </div>
 
               {model === 'dc' && garmentMode === 'upload' && (
-                <CategorySelector category={category} setCategory={setCategory} />
+                <div className="bg-gray-50/50 rounded-2xl p-6 border border-gray-100">
+                  <CategorySelector category={category} setCategory={setCategory} />
+                </div>
               )}
 
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                <div className="bg-red-50 border border-red-100 text-red-700 px-5 py-4 rounded-xl text-sm font-medium flex items-center gap-3">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                   {error}
                 </div>
               )}
@@ -170,18 +175,21 @@ export default function VirtualTryOn() {
                 <button
                   onClick={handleTryOn}
                   disabled={!personImage || !garmentImage || loading}
-                  className="w-full px-8 py-4 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+                  className="w-full max-w-md px-10 py-5 bg-brand-600 text-white font-bold text-xl rounded-2xl hover:bg-brand-700 disabled:bg-brand-200 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-xl flex items-center justify-center gap-3"
                 >
                   {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <>
+                      <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Processing...
-                    </span>
+                      Creating Magic...
+                    </>
                   ) : (
-                    'Generate Try-On'
+                    <>
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                      Generate My Look
+                    </>
                   )}
                 </button>
               </div>
@@ -189,7 +197,7 @@ export default function VirtualTryOn() {
           </div>
 
           {/* Right Sidebar - Galleries Stack */}
-          <div className="flex flex-col gap-6 w-80 flex-shrink-0">
+          <div className="flex flex-col gap-8 w-full lg:w-96 flex-shrink-0">
             {/* Default Models Gallery */}
             <ModelGallery
               personPreview={personPreview}
@@ -219,7 +227,7 @@ export default function VirtualTryOn() {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
           <ResultDisplay result={result} model={model} onReset={resetForm} />
         </div>
       )}
